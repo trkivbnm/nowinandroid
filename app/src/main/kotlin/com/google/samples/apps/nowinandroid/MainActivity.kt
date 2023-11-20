@@ -16,7 +16,9 @@
 
 package com.google.samples.apps.nowinandroid
 
+import android.content.pm.ApplicationInfo
 import android.os.Bundle
+import android.os.StrictMode
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
@@ -86,6 +88,14 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
+
+
+        // Kill NiA if there are main thread policy violations and log the offending call.
+        if (isDebuggable()) {
+            StrictMode.setThreadPolicy(
+                StrictMode.ThreadPolicy.Builder().detectAll().penaltyLog().penaltyDeath().build(),
+            )
+        }
 
         var uiState: MainActivityUiState by mutableStateOf(Loading)
 
@@ -197,6 +207,13 @@ class MainActivity : ComponentActivity() {
                 },
             )
         }
+    }
+
+    /**
+     * Check if the application is debuggable.
+     */
+    private fun isDebuggable(): Boolean {
+        return 0 != applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE
     }
 }
 
